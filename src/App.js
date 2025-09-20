@@ -19,7 +19,7 @@ function LoginPage() {
   return (
       <div className="center-wrapper">
         <div className="login-stack">
-          <h1 className="login-main-title">Barangay Balibago Case Portal TEST IBA</h1>
+          <h1 className="login-main-title">Barangay Balibago Case Portal</h1>
           <div className="login-container">
             <h2 className="login-title">Login</h2>
             <form onSubmit={handleSubmit}>
