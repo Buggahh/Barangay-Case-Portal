@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import FirestoreTest from "./FirestoreTest";
-
+import AdminPage from "./PortalPage";
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isAdminLoggedIn");
+    if (loggedIn === "true") {
+      setIsAdmin(true);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,9 +35,9 @@ function LoginPage() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        const userData = querySnapshot.docs[0].data();
-        alert(`Welcome ${userData.username}, role: ${userData.role}`);
-        // you can navigate to admin page here
+        // Get user data to use in alert >> const userData = querySnapshot.docs[0].data();
+        localStorage.setItem("isAdminLoggedIn", "true");
+        setIsAdmin(true); // Navigate to admin page
       } else {
         setError('Invalid credentials');
       }
@@ -39,6 +47,17 @@ function LoginPage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("isAdminLoggedIn");
+    setIsAdmin(false);
+    setUsername('');
+    setPassword('');
+    setError('');
+  };
+
+  if (isAdmin) {
+    return <AdminPage onLogout={handleLogout} />;
+  }
 
   return (
       <div className="center-wrapper">
