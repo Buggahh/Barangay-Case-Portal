@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import './App.css';
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -19,6 +19,7 @@ function App() {
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isAdminLoggedIn");
@@ -45,8 +46,9 @@ function App() {
 
       if (!querySnapshot.empty) {
         localStorage.setItem("isAdminLoggedIn", "true");
-        localStorage.setItem("loggedInUsername", username); // <-- Add this line
+        localStorage.setItem("loggedInUsername", username);
         setIsAdmin(true);
+        navigate("/Portal"); // Navigate to /Portal after login
       } else {
         setError('Invalid credentials');
       }
@@ -62,77 +64,73 @@ function App() {
     setUsername('');
     setPassword('');
     setError('');
+    navigate("/"); // Navigate to / after logout
   };
 
-  if (isAdmin) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="/" element={<PortalPage onLogout={handleLogout} />} />
-          <Route path="/database" element={<DatabasePage />} />
-          <Route path="/new-record" element={<NewRecordPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
-    );
-  }
-
   return (
-    <div className="center-wrapper">
-      <div className="login-stack">
-        <h1 className="login-main-title">Katarungang Pambarangay (KP) <br />Management Information System (MIS)</h1>
-        <div className="login-container">
-          <div className="login-title-group">
-            <h2 className="login-title">Sign In</h2>
-            <div className="login-subtitle">Login with your account..</div>
+    <Routes>
+      <Route path="/" element={
+        <div className="center-wrapper">
+          <div className="login-stack">
+            <h1 className="login-main-title">Katarungang Pambarangay (KP) <br />Management Information System (MIS)</h1>
+            <div className="login-container">
+              <div className="login-title-group">
+                <h2 className="login-title">Sign In</h2>
+                <div className="login-subtitle">Login with your account...</div>
+              </div>
+              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <div className="input-wrapper">
+                    <img
+                      src={userIcon}
+                      alt="User Icon"
+                      className="input-icon-img"
+                    />
+                  <input
+                    className="login-input"
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    autoComplete="username"
+                  />
+                </div>
+                <div className="input-wrapper">
+                  <img
+                    src={passwordIcon}
+                    alt="Password Icon"
+                    className="input-icon-img"
+                  />
+                  <input
+                    className="login-input"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                  />
+                  <img
+                    src={showPassword ? eyeOffIcon : eyeIcon}
+                    alt={showPassword ? "Hide password" : "Show password"}
+                    className="input-eye-img"
+                    onClick={() => setShowPassword(v => !v)}
+                    style={{ cursor: "pointer" }}
+                    tabIndex={0}
+                  />
+                </div>
+                <button className="login-btn" type="submit">LOGIN</button>
+              </form>
+              <div className="error">{error}</div>
+            </div>
           </div>
-          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-            <div className="input-wrapper">
-                <img
-                  src={userIcon}
-                  alt="User Icon"
-                  className="input-icon-img"
-                />
-              <input
-                className="login-input"
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                autoComplete="username"
-              />
-            </div>
-            <div className="input-wrapper">
-              <img
-                src={passwordIcon}
-                alt="Password Icon"
-                className="input-icon-img"
-              />
-              <input
-                className="login-input"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password"
-              />
-              <img
-                src={showPassword ? eyeOffIcon : eyeIcon}
-                alt={showPassword ? "Hide password" : "Show password"}
-                className="input-eye-img"
-                onClick={() => setShowPassword(v => !v)}
-                style={{ cursor: "pointer" }}
-                tabIndex={0}
-              />
-            </div>
-            <button className="login-btn" type="submit">LOGIN</button>
-          </form>
-          <div className="error">{error}</div>
+          < FirestoreTest/>
         </div>
-      </div>
-      < FirestoreTest/>
-    </div>
+      } />
+      <Route path="/Portal" element={<PortalPage onLogout={handleLogout} />} />
+      <Route path="/database" element={<DatabasePage />} />
+      <Route path="/new-record" element={<NewRecordPage />} />
+      <Route path="/reports" element={<ReportsPage />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
