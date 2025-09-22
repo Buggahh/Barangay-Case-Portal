@@ -131,6 +131,7 @@ function App() {
           <div className="error">{error}</div>
         </div>
       </div>
+      < FirestoreTest/>
     </div>
   );
 }
