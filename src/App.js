@@ -3,13 +3,18 @@ import './App.css';
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import FirestoreTest from "./FirestoreTest";
-import AdminPage from "./PortalPage";
+import PortalPage from "./PortalPage";
+import userIcon from './icons/user.png';
+import passwordIcon from './icons/password.png';
+import eyeOffIcon from './icons/eye.png';
+import eyeIcon from './icons/eye-off.png';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isAdminLoggedIn");
@@ -56,16 +61,25 @@ function LoginPage() {
   };
 
   if (isAdmin) {
-    return <AdminPage onLogout={handleLogout} />;
+    return <PortalPage onLogout={handleLogout} />;
   }
 
   return (
-      <div className="center-wrapper">
-        <div className="login-stack">
-          <h1 className="login-main-title">Barangay Balibago Case Portal</h1>
-          <div className="login-container">
-            <h2 className="login-title">Login</h2>
-            <form onSubmit={handleSubmit}>
+    <div className="center-wrapper">
+      <div className="login-stack">
+        <h1 className="login-main-title">Katarungang Pambarangay (KP) <br />Management Information System (MIS)</h1>
+        <div className="login-container">
+          <div className="login-title-group">
+            <h2 className="login-title">Sign In</h2>
+            <div className="login-subtitle">Login with your account</div>
+          </div>
+          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <div className="input-wrapper">
+                <img
+                  src={userIcon}
+                  alt="User Icon"
+                  className="input-icon-img"
+                />
               <input
                 className="login-input"
                 type="text"
@@ -73,23 +87,37 @@ function LoginPage() {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 autoComplete="username"
-                style={{ marginTop: '1.5rem' }}
+              />
+            </div>
+            <div className="input-wrapper">
+              <img
+                src={passwordIcon}
+                alt="Password Icon"
+                className="input-icon-img"
               />
               <input
                 className="login-input"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
               />
-              <div className="error">{error}</div>
-              <button className="login-btn" type="submit">Log In</button>
-            </form>
-          </div>
+              <img
+                src={showPassword ? eyeOffIcon : eyeIcon}
+                alt={showPassword ? "Hide password" : "Show password"}
+                className="input-eye-img"
+                onClick={() => setShowPassword(v => !v)}
+                style={{ cursor: "pointer" }}
+                tabIndex={0}
+              />
+            </div>
+            <button className="login-btn" type="submit">LOGIN</button>
+          </form>
+          <div className="error">{error}</div>
         </div>
-        <FirestoreTest />
       </div>
+    </div>
   );
 }
 

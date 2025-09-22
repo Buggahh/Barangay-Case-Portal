@@ -27,38 +27,86 @@ body {
 
 .login-container {
   background: #fff;
-  padding: 2rem 2.5rem;
+  padding: 2rem 2.5rem 1rem 2.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.1);
   min-width: 300px;
+  width: 500px;           /* Set fixed width */
+  max-width: 90vw;        /* Responsive on small screens */
   display: flex;
   flex-direction: column;
   align-items: center;
   background: #fffefc;
 }
 
+.login-title-group {
+  width: 100%;            /* take full width */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* keep left alignment */
+  margin-bottom: 1.2rem;
+}
+
+.login-title {
+  font-size: 25px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.login-subtitle {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+  margin-left: 2px;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1.1rem;
+}
+
+/* Icon on the left inside the input */
+.input-icon-img {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  width: 22px;  /* bigger icon */
+  height: 22px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* The input field itself */
 .login-input {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  margin: 0 auto 1.1rem auto;
+  width: 100%;            
+  padding: 0.8rem 1rem 0.8rem 3rem;
   border: 0.1px solid #e8e9eb;
-  border-radius: 4px;
-  font-size: .8rem;
+  border-radius: 15px;
+  font-size: 1rem;
   background: #f3f4f6;
-  transition: border 0.2s;
   box-sizing: border-box;
+}
+
+.input-eye-img {
+  position: absolute;
+  right: 12px;
+  width: 22px;  /* bigger icon */
+  height: 22px;
+  top: 23%;
 }
 
 .login-btn {
   display: block;
-  margin: 0 auto 0 auto;
-  width: 50%;
-  padding: 0.5rem 0;
-  background: #ad6f35;
+  margin: 2rem auto 0 auto;
+  width: 40%;
+  padding: 0.8rem 0rem 0.8rem 0rem;
+  background: #db924d;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: .9rem;
+  border-radius: 10px;
+  font-size: 1rem;
   cursor: pointer;
 }
 
@@ -67,8 +115,7 @@ body {
   font-size: 0.9rem;
   margin: 0.5rem 0;
   min-height: 20px; 
-  margin-top: -2%;
-  margin-bottom: 12%;
+  margin-top: 5%;
 }
 
 .card-container {
