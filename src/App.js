@@ -61,8 +61,8 @@ function LoginPage() {
   };
 
   if (isAdmin) {
-    return <PortalPage onLogout={handleLogout} />;
-  }
+      return <PortalPage onLogout={handleLogout} />;
+    }
 
   return (
     <div className="center-wrapper">

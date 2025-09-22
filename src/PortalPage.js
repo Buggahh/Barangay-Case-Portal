@@ -1,13 +1,35 @@
 import React, { useEffect, useState } from "react";
-// import logo from "./logo192.png"; // Uncomment and use your logo if available
+import { db } from "./firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
-function AdminPage({ onLogout }) {
+function PortalPage({ onLogout }) {
   const [dateTime, setDateTime] = useState(new Date());
+  const [role, setRole] = useState("");
+  const [username, setUsername] = useState(localStorage.getItem("loggedInUsername") || "");
 
   useEffect(() => {
     const timer = setInterval(() => setDateTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Fetch user role from Firestore
+  useEffect(() => {
+    async function fetchRole() {
+      if (!username) return;
+      const q = query(
+        collection(db, "users"),
+        where("username", "==", username)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userData = querySnapshot.docs[0].data();
+        setRole(userData.role || "Unknown");
+      } else {
+        setRole("Unknown");
+      }
+    }
+    fetchRole();
+  }, [username]);
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
     month: "long",
@@ -37,7 +59,9 @@ function AdminPage({ onLogout }) {
             </div>
           </div>
           <div className="header-top-right">
-            <span className="header-admin">Username: Admin</span> {/*Need change, check what kind of username, then put it here*/}
+            <span className="header-admin">
+              {username ? `Username: ${username}` : ""} {/*role && `| Role: ${role}`*/}
+            </span>
             <button onClick={onLogout} className="logout-btn">Sign Out</button>
           </div>
         </div>
@@ -50,9 +74,9 @@ function AdminPage({ onLogout }) {
           <nav className="header-bottom-nav">
             <a href="#" className="header-link">Home</a>
             <a href="#" className="header-link">Dashboard</a>
-            <a href="#" className="header-link">Database</a>
-            <a href="#" className="header-link">New Record</a>
-            <a href="#" className="header-link">Reports</a>
+            <a href="./DatabasePage.js" className="header-link">Database</a>
+            <a href="./NewRecordPage.js" className="header-link">New Record</a>
+            <a href="./ReportsPage.js" className="header-link">Reports</a>
           </nav>
         </div>
       </header>
@@ -69,4 +93,4 @@ function AdminPage({ onLogout }) {
   );
 }
 
-export default AdminPage;
+export default PortalPage;
