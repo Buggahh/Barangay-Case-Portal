@@ -8,6 +8,7 @@ import PortalPage from "./PortalPage";
 import DatabasePage from "./DatabasePage";
 import NewRecordPage from "./NewRecordPage";
 import ReportsPage from "./ReportsPage";
+import ProtectedRoute from "./ProtectedRoute";
 import userIcon from './icons/user.png';
 import passwordIcon from './icons/password.png';
 import eyeOffIcon from './icons/eye.png';
@@ -17,15 +18,11 @@ function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isAdminLoggedIn");
-    if (loggedIn === "true") {
-      setIsAdmin(true);
-    }
+    // No need for isAdmin state, rely on localStorage and ProtectedRoute
   }, []);
 
   const handleSubmit = async (e) => {
@@ -47,7 +44,6 @@ function App() {
       if (!querySnapshot.empty) {
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("loggedInUsername", username);
-        setIsAdmin(true);
         navigate("/Portal"); // Navigate to /Portal after login
       } else {
         setError('Invalid credentials');
@@ -60,11 +56,11 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem("isAdminLoggedIn");
-    setIsAdmin(false);
+    localStorage.removeItem("loggedInUsername");
     setUsername('');
     setPassword('');
     setError('');
-    navigate("/"); // Navigate to / after logout
+    navigate("/", { replace: true }); // Use replace to prevent back navigation
   };
 
   return (
@@ -76,15 +72,15 @@ function App() {
             <div className="login-container">
               <div className="login-title-group">
                 <h2 className="login-title">Sign In</h2>
-                <div className="login-subtitle">Login with your account...</div>
+                <div className="login-subtitle">Login with your account.....</div>
               </div>
               <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                 <div className="input-wrapper">
-                    <img
-                      src={userIcon}
-                      alt="User Icon"
-                      className="input-icon-img"
-                    />
+                  <img
+                    src={userIcon}
+                    alt="User Icon"
+                    className="input-icon-img"
+                  />
                   <input
                     className="login-input"
                     type="text"
@@ -125,10 +121,38 @@ function App() {
           < FirestoreTest/>
         </div>
       } />
-      <Route path="/Portal" element={<PortalPage onLogout={handleLogout} />} />
-      <Route path="/database" element={<DatabasePage />} />
-      <Route path="/new-record" element={<NewRecordPage />} />
-      <Route path="/reports" element={<ReportsPage />} />
+      <Route
+        path="/Portal"
+        element={
+          <ProtectedRoute>
+            <PortalPage onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/database"
+        element={
+          <ProtectedRoute>
+            <DatabasePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/new-record"
+        element={
+          <ProtectedRoute>
+            <NewRecordPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <ReportsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

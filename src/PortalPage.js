@@ -74,10 +74,10 @@ function PortalPage({ onLogout }) {
           </div>
           <nav className="header-bottom-nav">
             <Link to="/" className="header-link">Home</Link>
-            <Link to="/dashboard" className="header-link">Dashboard</Link>
-            <Link to="/database" className="header-link">Database</Link>
-            <Link to="/new-record" className="header-link">New Record</Link>
-            <Link to="/reports" className="header-link">Reports</Link>
+            <Link to="/Dashboard" className="header-link">Dashboard</Link>
+            <Link to="/Database" className="header-link">Database</Link>
+            <Link to="/New-Record" className="header-link">New Record</Link>
+            <Link to="/Reports" className="header-link">Reports</Link>
           </nav>
         </div>
       </header>
