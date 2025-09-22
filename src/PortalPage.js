@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -72,15 +73,15 @@ function PortalPage({ onLogout }) {
             <div className="header-kp">Management Information Systems (MIS)</div>
           </div>
           <nav className="header-bottom-nav">
-            <a href="#" className="header-link">Home</a>
-            <a href="#" className="header-link">Dashboard</a>
-            <a href="./DatabasePage.js" className="header-link">Database</a>
-            <a href="./NewRecordPage.js" className="header-link">New Record</a>
-            <a href="./ReportsPage.js" className="header-link">Reports</a>
+            <Link to="/" className="header-link">Home</Link>
+            <Link to="/dashboard" className="header-link">Dashboard</Link>
+            <Link to="/database" className="header-link">Database</Link>
+            <Link to="/new-record" className="header-link">New Record</Link>
+            <Link to="/reports" className="header-link">Reports</Link>
           </nav>
         </div>
       </header>
-      <div style={{ padding: "2rem", textAlign: "center" }}>
+      {/* <div style={{ padding: "2rem", textAlign: "center" }}>
         <h1>Barangay Case Portal</h1>
         <h3>{formattedDate}</h3>
         <h4>{formattedTime}</h4>
@@ -88,7 +89,7 @@ function PortalPage({ onLogout }) {
           <h2>Card Title</h2>
           <p>This is a sample content inside the card.</p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

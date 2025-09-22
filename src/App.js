@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import FirestoreTest from "./FirestoreTest";
 import PortalPage from "./PortalPage";
+import DatabasePage from "./DatabasePage";
+import NewRecordPage from "./NewRecordPage";
+import ReportsPage from "./ReportsPage";
 import userIcon from './icons/user.png';
 import passwordIcon from './icons/password.png';
 import eyeOffIcon from './icons/eye.png';
 import eyeIcon from './icons/eye-off.png';
 
-function LoginPage() {
+function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -61,8 +65,18 @@ function LoginPage() {
   };
 
   if (isAdmin) {
-      return <PortalPage onLogout={handleLogout} />;
-    }
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<PortalPage onLogout={handleLogout} />} />
+          <Route path="/database" element={<DatabasePage />} />
+          <Route path="/new-record" element={<NewRecordPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    );
+  }
 
   return (
     <div className="center-wrapper">
@@ -121,4 +135,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default App;
