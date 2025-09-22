@@ -44,9 +44,9 @@ function App() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // Get user data to use in alert >> const userData = querySnapshot.docs[0].data();
         localStorage.setItem("isAdminLoggedIn", "true");
-        setIsAdmin(true); // Navigate to admin page
+        localStorage.setItem("loggedInUsername", username); // <-- Add this line
+        setIsAdmin(true);
       } else {
         setError('Invalid credentials');
       }
@@ -85,7 +85,7 @@ function App() {
         <div className="login-container">
           <div className="login-title-group">
             <h2 className="login-title">Sign In</h2>
-            <div className="login-subtitle">Login with your account</div>
+            <div className="login-subtitle">Login with your account..</div>
           </div>
           <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             <div className="input-wrapper">
