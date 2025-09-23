@@ -1,0 +1,241 @@
+.newrecord-main-content {
+  padding: 2rem 1rem 0rem 1rem;
+  text-align: left;
+}
+
+.newrecord-table tr:first-child td {
+  border: none;
+  background: #fff7f0;
+  font-weight: bold;
+  color: #222;
+  padding-left: 10px;
+}
+
+.newrecord-table {
+  border-collapse: collapse;
+  margin-right: 10px;
+  width: 98%;
+  min-width: 320px;
+  table-layout: auto;
+  background: #fff;
+}
+
+.newrecord-table td {
+  border: 1px solid #000000;
+  width: 250px;
+  height: 40px;
+  background: #fff;
+}
+
+.newrecord-table td:first-child {
+  width: 230px;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.newrecord-table td:last-child {
+  width:1000px;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.newrecord-add-btn {
+  color: #e42727;
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 25px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.add-btn-absolute {
+  position: absolute;
+  right: -90px; /* 50px further right from the cell */
+  top: 50%;
+  transform: translateY(-73%);
+  z-index: 2;
+}
+
+.newrecord-input {
+  width: 100%;
+  padding: 10px 20px;
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.newrecord-input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #ffffff;
+}
+
+.newrecord-input::placeholder {
+  color: rgb(0, 0, 0);
+  opacity: 0.2;  
+}
+
+/* Highlight selected status cell */
+.status-radio-cell.selected {
+  background: #2563eb;
+  color: #000000;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+/* Highlight selected repudiated radio */
+.repudiated-radio.selected,
+.execution-radio.selected {
+  background: #2563eb;
+  color: #000000;
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-weight: bold;
+}
+.repudiated-radio,
+.execution-radio {
+  padding: 2px 10px;
+  margin-right: 5px;
+  background: #f5f5f5;
+  color: #222;
+  border-radius: 4px;
+  font-weight: normal;
+}
+
+.case-status-table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+  background: #fff;
+  margin-bottom: 8px;
+}
+
+.case-status-cell {
+  border: 2px solid #222;
+  padding: 8px 12px;
+  font-size: 15px;
+  background: #fff;
+  min-width: 60px; /* reduce for mobile */
+  word-break: break-word;
+}
+
+.status-btn {
+  transition: background 0.2s, color 0.2s;
+  font-weight: 600;
+  background: #fff;
+}
+.status-btn.selected {
+  background: #8ed8f8;
+  color: #000000;
+  border-color: #222;
+}
+
+.case-status-input {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+  padding: 10px 0;
+  width: 98%;
+}
+
+.case-status-input::placeholder {
+  color: rgb(0, 0, 0);
+  opacity: 0.2;  
+}
+
+.pill-radio {
+  display: inline-block;
+  min-width: 36px;
+  padding: 3px 3px;
+  border: 2px solid #ffffff;
+  border-radius: 16px;
+  background: #fff;
+  color: #000000;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  margin-right: 2px;
+}
+.pill-radio.selected {
+  background: #8ed8f8;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* Responsive tables */
+.case-status-table,
+.newrecord-table {
+  width: 90%;
+  min-width: 320px;
+  table-layout: auto;
+}
+
+@media (max-width: 900px) {
+  .newrecord-main-content {
+    padding: 1rem 0.5rem 0rem 0.5rem;
+  }
+  .header-container {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+  .header-top-row, .header-bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-bottom-nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .newrecord-table-row, .case-status-table {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+  .newrecord-table, .case-status-table {
+    min-width: 320px;
+    font-size: 0.95rem;
+  }
+  .newrecord-table td, .case-status-table td {
+    font-size: 0.95rem;
+    padding: 6px 4px;
+    min-width: 40px;
+  }
+  .newrecord-add-btn {
+    font-size: 18px;
+    padding: 2px 8px;
+  }
+  .newrecord-input, .case-status-input {
+    font-size: 0.95rem;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .newrecord-main-content {
+    padding: 0.5rem 0.2rem 0rem 0.2rem;
+  }
+  .header-top-titles, .header-bottom-nav {
+    font-size: 0.9rem;
+  }
+  .newrecord-table, .case-status-table {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.9rem;
+  }
+  .newrecord-table td, .case-status-table td {
+    font-size: 0.9rem;
+    padding: 4px 2px;
+    min-width: 30px;
+  }
+  .newrecord-add-btn {
+    font-size: 15px;
+    padding: 1px 4px;
+  }
+  .newrecord-input, .case-status-input {
+    font-size: 0.9rem;
+    padding: 4px 4px;
+  }
+}
