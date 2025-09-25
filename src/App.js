@@ -133,7 +133,7 @@ function App() {
         path="/database"
         element={
           <ProtectedRoute>
-            <DatabasePage />
+            <DatabasePage onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -141,7 +141,7 @@ function App() {
         path="/new-record"
         element={
           <ProtectedRoute>
-            <NewRecordPage />
+            <NewRecordPage onLogout={handleLogout}/>
           </ProtectedRoute>
         }
       />
@@ -149,7 +149,7 @@ function App() {
         path="/reports"
         element={
           <ProtectedRoute>
-            <ReportsPage />
+            <ReportsPage onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />

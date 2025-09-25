@@ -1,5 +1,6 @@
 .newrecord-main-content {
   padding: 2rem 1rem 0rem 1rem;
+  margin-bottom: 10px;
   text-align: left;
 }
 
@@ -15,13 +16,12 @@
   border-collapse: collapse;
   margin-right: 10px;
   width: 98%;
-  min-width: 320px;
   table-layout: auto;
   background: #fff;
 }
 
 .newrecord-table td {
-  border: 1px solid #000000;
+  border: 2px solid #000000;
   width: 250px;
   height: 40px;
   background: #fff;
@@ -47,9 +47,6 @@
   font-size: 25px;
   cursor: pointer;
   margin-top: 8px;
-}
-
-.add-btn-absolute {
   position: absolute;
   right: -90px; /* 50px further right from the cell */
   top: 50%;
@@ -64,6 +61,7 @@
   background-color: #ffffff;
   font-size: 1rem;
   box-sizing: border-box;
+  height: 30px;
 }
 
 .newrecord-input:focus {
@@ -117,7 +115,6 @@
   padding: 8px 12px;
   font-size: 15px;
   background: #fff;
-  min-width: 60px; /* reduce for mobile */
   word-break: break-word;
 }
 
@@ -169,73 +166,132 @@
 .case-status-table,
 .newrecord-table {
   width: 90%;
-  min-width: 320px;
-  table-layout: auto;
 }
 
-@media (max-width: 900px) {
-  .newrecord-main-content {
-    padding: 1rem 0.5rem 0rem 0.5rem;
-  }
-  .header-container {
-    flex-direction: column;
-    padding: 0.5rem;
-  }
-  .header-top-row, .header-bottom-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .header-bottom-nav {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .newrecord-table-row, .case-status-table {
-    width: 100%;
-    overflow-x: auto;
-    display: block;
-  }
-  .newrecord-table, .case-status-table {
-    min-width: 320px;
-    font-size: 0.95rem;
-  }
-  .newrecord-table td, .case-status-table td {
-    font-size: 0.95rem;
-    padding: 6px 4px;
-    min-width: 40px;
-  }
-  .newrecord-add-btn {
-    font-size: 18px;
-    padding: 2px 8px;
-  }
-  .newrecord-input, .case-status-input {
-    font-size: 0.95rem;
-    padding: 6px 8px;
-  }
+.uploads-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-@media (max-width: 600px) {
-  .newrecord-main-content {
-    padding: 0.5rem 0.2rem 0rem 0.2rem;
-  }
-  .header-top-titles, .header-bottom-nav {
-    font-size: 0.9rem;
-  }
-  .newrecord-table, .case-status-table {
-    width: 100%;
-    min-width: 0;
-    font-size: 0.9rem;
-  }
-  .newrecord-table td, .case-status-table td {
-    font-size: 0.9rem;
-    padding: 4px 2px;
-    min-width: 30px;
-  }
-  .newrecord-add-btn {
-    font-size: 15px;
-    padding: 1px 4px;
-  }
-  .newrecord-input, .case-status-input {
-    font-size: 0.9rem;
-    padding: 4px 4px;
-  }
+.uploads-list li {
+  margin-left: 25px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.upload-icon {
+  width: 24px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.upload-label {
+  color: #000;
+  font-weight: 500;
+}
+
+.complainant-wrapper {
+  display: flex;
+  justify-content: flex-start; 
+  gap: 20px;                  
+  max-width: 90%;                  
+}
+
+.complainant-table.left {
+  width: 40%;                  
+  min-width: 300px;
+}
+
+.complainant-table.right {
+  width: 70%;                  
+  min-width: 400px;
+}
+
+.complainant-table {
+  border-collapse: collapse;
+  background: #fff;
+  margin-bottom: 10px;
+  border: 2px solid #000;
+}
+
+.complainant-table td {
+  border: 2px solid #000;
+  padding: 6px 8px;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.complainant-label {
+  min-width: 120px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.newrecord-input {
+  width: 100%;
+  height: 28px;
+}
+
+.small-input {
+  width: 48%;
+  min-width: 80px;
+  margin-right: 4px;
+}
+
+/* Wrapper */
+.complainantInformation-main-content {
+  gap: 20px;                  
+  max-width: 90%;           
+  margin-left: 16px;       
+}
+
+.complainantInformation-row {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+/* Tables */
+.complainantInformation-table {
+  border-collapse: collapse;
+  background: #fff;
+}
+
+/* Left Table smaller */
+.complainantInformation-table.left {
+  width: 35%;
+  min-width: 300px;
+  border: 2px solid #000;
+}
+
+/* Right Table bigger */
+.complainantInformation-table.right {
+  width: 55%;
+  min-width: 400px;
+  border: 2px solid #000;
+}
+
+/* Remove border for header row */
+.complainantInformation-table.right th {
+  background: #fff7f0;
+  padding: 8px;
+  font-size: 16px;
+  text-align: left;
+}
+
+/* Cells */
+.complainantInformation-table td {
+  border: 2px solid #000;
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+
+/* Labels */
+.complainantInformation-label {
+  min-width: 120px;
+  font-weight: 600;
+  font-size: 14px;
 }

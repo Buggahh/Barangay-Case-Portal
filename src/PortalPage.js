@@ -4,14 +4,8 @@ import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 function PortalPage({ onLogout }) {
-  const [dateTime, setDateTime] = useState(new Date());
   const [role, setRole] = useState("");
-  const [username, setUsername] = useState(localStorage.getItem("loggedInUsername") || "");
-
-  useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const [username, setUsername] = useState(localStorage.getItem("loggedInUsername") || "wala username");
 
   // Fetch user role from Firestore
   useEffect(() => {
@@ -31,18 +25,6 @@ function PortalPage({ onLogout }) {
     }
     fetchRole();
   }, [username]);
-
-  const formattedDate = dateTime.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  const formattedTime = dateTime.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
 
   return (
     <div>
@@ -81,15 +63,6 @@ function PortalPage({ onLogout }) {
           </nav>
         </div>
       </header>
-      {/* <div style={{ padding: "2rem", textAlign: "center" }}>
-        <h1>Barangay Case Portal</h1>
-        <h3>{formattedDate}</h3>
-        <h4>{formattedTime}</h4>
-        <div className="card-container">
-          <h2>Card Title</h2>
-          <p>This is a sample content inside the card.</p>
-        </div>
-      </div> */}
     </div>
   );
 }

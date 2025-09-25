@@ -3,16 +3,11 @@ import { Link } from "react-router-dom";
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import "./NewRecordPage.css";
+import uploadIcon from './icons/upload.png';
 
 function NewRecordPage({ onLogout }) {
-  const [dateTime, setDateTime] = useState(new Date());
   const [role, setRole] = useState("");
   const [username, setUsername] = useState(localStorage.getItem("loggedInUsername") || "");
-
-  // Table state
-  const [rows, setRows] = useState([
-    { type: "main", date: "", time: "", remarks: "" }
-  ]);
 
   // Case Status state
   const [statusDate, setStatusDate] = useState("");
@@ -45,11 +40,28 @@ function NewRecordPage({ onLogout }) {
   const [arbitrationRows, setArbitrationRows] = useState([
     { date: "", time: "", remarks: "" }
   ]);
+    const [ammicableRows, setAmmicableRows] = useState([
+    { date: "", time: "", remarks: "" }
+  ]);
 
-  useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Complainants state
+  const [complainants, setComplainants] = useState([
+    {
+      lastname: "",
+      firstname: "",
+      middlename: "",
+      extension: "",
+      nickname: "",
+      sex: "",
+      birthdate: "",
+      province: "",
+      city: "",
+      barangay: "",
+      specific: "",
+      contact: "",
+      email: ""
+    }
+  ]);
 
   // Fetch user role from Firestore
   useEffect(() => {
@@ -69,15 +81,6 @@ function NewRecordPage({ onLogout }) {
     }
     fetchRole();
   }, [username]);
-
-  // Handle cell changes
-  const handleCellChange = (idx, field, value) => {
-    setRows(rows =>
-      rows.map((row, i) =>
-        i === idx ? { ...row, [field]: value } : row
-      )
-    );
-  };
 
   // Handlers for each table
   const handleMediationChange = (idx, field, value) => {
@@ -101,14 +104,14 @@ function NewRecordPage({ onLogout }) {
       )
     );
   };
-
-  // Add new row
-  const handleAddRow = () => {
-    setRows(rows => [
-      ...rows,
-      { type: "sub", date: "", time: "", remarks: "" }
-    ]);
+    const handleAmmicableChange = (idx, field, value) => {
+    setAmmicableRows(rows =>
+      rows.map((row, i) =>
+        i === idx ? { ...row, [field]: value } : row
+      )
+    );
   };
+
   const handleAddMediation = () => {
     setMediationRows(rows => [
       ...rows,
@@ -125,6 +128,41 @@ function NewRecordPage({ onLogout }) {
     setArbitrationRows(rows => [
       ...rows,
       { date: "", time: "", remarks: "" }
+    ]);
+  };
+    const handleAddAmmicable = () => {
+    setAmmicableRows(rows => [
+      ...rows,
+      { date: "", time: "", remarks: "" }
+    ]);
+  };
+
+  const handleComplainantChange = (idx, field, value) => {
+    setComplainants(list =>
+      list.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const handleAddComplainant = () => {
+    setComplainants(list => [
+      ...list,
+      {
+        lastname: "",
+        firstname: "",
+        middlename: "",
+        extension: "",
+        nickname: "",
+        sex: "",
+        birthdate: "",
+        province: "",
+        city: "",
+        barangay: "",
+        specific: "",
+        contact: "",
+        email: ""
+      }
     ]);
   };
 
@@ -172,10 +210,6 @@ function NewRecordPage({ onLogout }) {
           <table className="newrecord-table">
             <tbody>
               <tr>
-                <td></td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Date</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Time</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Remarks</td>
               </tr>
               {mediationRows.map((row, idx) => (
                 <tr key={idx} style={{ position: idx === mediationRows.length - 1 ? "relative" : "static" }}>
@@ -227,10 +261,6 @@ function NewRecordPage({ onLogout }) {
           <table className="newrecord-table">
             <tbody>
               <tr>
-                <td></td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Date</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Time</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Remarks</td>
               </tr>
               {conciliationRows.map((row, idx) => (
                 <tr key={idx} style={{ position: idx === conciliationRows.length - 1 ? "relative" : "static" }}>
@@ -282,10 +312,6 @@ function NewRecordPage({ onLogout }) {
           <table className="newrecord-table">
             <tbody>
               <tr>
-                <td></td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Date</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Time</td>
-                <td className="newrecord-header-cell" style={{ textAlign: "left" }}>Remarks</td>
               </tr>
               {arbitrationRows.map((row, idx) => (
                 <tr key={idx} style={{ position: idx === arbitrationRows.length - 1 ? "relative" : "static" }}>
@@ -331,14 +357,14 @@ function NewRecordPage({ onLogout }) {
         </div>
       </div>
       
-      {/* Case Status Section */}
+      {/* Case Status - Section */}
       <div className="newrecord-main-content">
         <h1 style={{ color: 'red' }}>Case Status</h1>
-        {/* Status Table */}
+        {/* Case Status - Status */}
         <table className="case-status-table">
           <tbody>
             <tr>
-              <td className="case-status-cell" style={{fontWeight: 600 }}>
+              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
                 Date:&nbsp;
                 <input
                   type="date"
@@ -361,19 +387,19 @@ function NewRecordPage({ onLogout }) {
           </tbody>
         </table>
 
-        {/* Status Details Table */}
+        {/* Case Status - Repudiated Table */}
         <table className="case-status-table">
           <tbody>
             <tr>
               <td className="case-status-cell" style={{fontWeight: 600, background: "#f8f8f8" }}>
                 {selectedStatus && <span>{selectedStatus}</span>}
               </td>
-              <td className="case-status-cell" style={{fontWeight: 600, borderBottom: '1px solid white'}}>
+              <td className="case-status-cell" style={{fontWeight: 600, borderBottomColor: '#ffffff'}}>
                 Main Point of Agreement/Award:
               </td>
             </tr>
             <tr>
-              <td className="case-status-cell">
+              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
                 Repudiated?&nbsp;
                 <span
                   className={`pill-radio${repudiated === "Yes" ? " selected" : ""}`}
@@ -400,12 +426,12 @@ function NewRecordPage({ onLogout }) {
           </tbody>
         </table>
 
-        {/* Execution Table */}
+        {/* Case Status - Execution Table */}
         <table className="case-status-table">
           <tbody>
             <tr>
-              <td className="case-status-cell" style={{fontWeight: 600 }}>Execution</td>
-              <td className="case-status-cell">
+              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>Execution</td>
+              <td className="case-status-cell" style={{fontWeight: 600,  width: 240, textAlign: "center" }}>
                 <span
                   className={`pill-radio${execution === "Yes" ? " selected" : ""}`}
                   onClick={() => setExecution("Yes")}
@@ -416,13 +442,14 @@ function NewRecordPage({ onLogout }) {
                   onClick={() => setExecution("No")}
                 >No</span>
               </td>
-              <td className="case-status-cell">
+              <td className="case-status-cell" style={{ width: 205 }}>
                 Date:&nbsp;
                 <input
                   type="date"
                   value={executionDate}
                   onChange={e => setExecutionDate(e.target.value)}
                   className="case-status-input"
+                  style={{ width: "70%" }}
                 />
               </td>
               <td className="case-status-cell">
@@ -433,11 +460,313 @@ function NewRecordPage({ onLogout }) {
                   onChange={e => setExecutionReason(e.target.value)}
                   className="case-status-input"
                   placeholder="Enter reason"
+                  style={{ width: "70%" }}
                 />
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* Compliance to Amicable Settlement */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Compliance to Amicable Settlement</h1>
+        <div className="newrecord-table-row">
+          <table className="newrecord-table">
+            <tbody>
+              <tr>
+              </tr>
+              {ammicableRows.map((row, idx) => (
+                <tr key={idx} style={{ position: idx === ammicableRows.length - 1 ? "relative" : "static" }}>
+                  <td style={{ width: 0 }}>
+                    <span style={{marginRight: 12}}>Date:</span>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={e => handleAmmicableChange(idx, "date", e.target.value)}
+                      className="newrecord-input"
+                      style={{ width: "70%" }}
+                    />
+                  </td>
+                  <td style={{ paddingLeft: "0px" }}>
+                    <span style={{marginLeft: 12, marginRight: 12 }}>Remarks:</span>
+                    <input
+                      type="text"
+                      value={row.remarks}
+                      onChange={e => handleAmmicableChange(idx, "remarks", e.target.value)}
+                      className="newrecord-input"
+                      placeholder="Enter remarks"
+                      style={{ width: "80%" }}
+                    />
+                    {idx === ammicableRows.length - 1 && (
+                      <button
+                        className="newrecord-add-btn"
+                        onClick={handleAddAmmicable}
+                        type="button"
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Uploads */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Uploads</h1>
+        <ul className="uploads-list">
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Complaint Sheet</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Amicable Settlement</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Certificate to File Action</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Photo</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Complainant Section */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Complainant</h1>
+        <div className="complainant-wrapper">
+          {/* Left Table */}
+          <table className="complainant-table left">
+            <tbody>
+              <tr>
+                <td className="complainant-label">Date &amp; Time Filed</td>
+                <td>
+                  <input type="date" className="newrecord-input small-input" />
+                  <input type="time" className="newrecord-input small-input" />
+                </td>
+              </tr>
+              <tr>
+                <td className="complainant-label">Date of Incident</td>
+                <td>
+                  <input type="date" className="newrecord-input small-input" />
+                </td>
+              </tr>
+              <tr>
+                <td className="complainant-label">Place of Incident</td>
+                <td>
+                  <input type="text" className="newrecord-input" placeholder="Enter place" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Right Table */}
+          <table className="complainant-table right">
+            <tbody>
+              <tr>
+                <td className="complainant-label" style={{ width: "20%" }}>Nature of Complaint</td>
+                <td><input type="text" className="newrecord-input" placeholder="Enter nature" /></td>
+              </tr>
+              <tr>
+                <td className="complainant-label">Offense/Violation</td>
+                <td><input type="text" className="newrecord-input" placeholder="Enter offense" /></td>
+              </tr>
+              <tr>
+                <td className="complainant-label">Specific</td>
+                <td><input type="text" className="newrecord-input" placeholder="Enter specific" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Complainant's Information Section */}
+      <div className="complainantInformation-main-content">
+        <h1 style={{ color: 'red' }}>Complainant’s Information</h1>
+        {complainants.map((c, idx) => (
+          <div
+            key={idx}
+            className="complainantInformation-row"
+          >
+            {/* Left Table */}
+            <table className="complainantInformation-table left">
+              <tbody>
+                <tr>
+                  <td className="complainantInformation-label">Lastname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.lastname}
+                      onChange={e => handleComplainantChange(idx, "lastname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Firstname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.firstname}
+                      onChange={e => handleComplainantChange(idx, "firstname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Middlename:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.middlename}
+                      onChange={e => handleComplainantChange(idx, "middlename", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Extension:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.extension}
+                      onChange={e => handleComplainantChange(idx, "extension", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Nickname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.nickname}
+                      onChange={e => handleComplainantChange(idx, "nickname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Sex:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.sex}
+                      onChange={e => handleComplainantChange(idx, "sex", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Birthdate:</td>
+                  <td>
+                    <input
+                      type="date"
+                      className="newrecord-input"
+                      value={c.birthdate}
+                      onChange={e => handleComplainantChange(idx, "birthdate", e.target.value)}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Right Table */}
+            <table className="complainantInformation-table right">
+              <thead>
+                <tr>
+                  <th colSpan={2}>Address and Contact Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="complainantInformation-label">Province:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.province}
+                      onChange={e => handleComplainantChange(idx, "province", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">City/Mun:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.city}
+                      onChange={e => handleComplainantChange(idx, "city", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Barangay:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.barangay}
+                      onChange={e => handleComplainantChange(idx, "barangay", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">Specific:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.specific}
+                      onChange={e => handleComplainantChange(idx, "specific", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">ContactNo:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.contact}
+                      onChange={e => handleComplainantChange(idx, "contact", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="complainantInformation-label">EmailAdd:</td>
+                  <td>
+                    <input
+                      type="email"
+                      className="newrecord-input"
+                      value={c.email}
+                      onChange={e => handleComplainantChange(idx, "email", e.target.value)}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* +ADD button */}
+            {idx === complainants.length - 1 && (
+              <button
+                className="newrecord-add-btn"
+                type="button"
+                onClick={handleAddComplainant}
+              >
+                + ADD
+              </button>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
