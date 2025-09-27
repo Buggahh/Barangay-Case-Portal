@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/Barangay-Case-Portal/static/css/main.962d78de.css",
-    "main.js": "/Barangay-Case-Portal/static/js/main.512df980.js",
+    "main.css": "/Barangay-Case-Portal/static/css/main.6ca76fe0.css",
+    "main.js": "/Barangay-Case-Portal/static/js/main.5ac3d9ab.js",
     "static/media/eye-off.png": "/Barangay-Case-Portal/static/media/eye-off.c3bc1d12bcc8981f2f64.png",
     "static/media/user.png": "/Barangay-Case-Portal/static/media/user.155501afc9fb319300ea.png",
     "static/media/eye.png": "/Barangay-Case-Portal/static/media/eye.54b3107d160578572bcc.png",
     "index.html": "/Barangay-Case-Portal/index.html",
-    "main.962d78de.css.map": "/Barangay-Case-Portal/static/css/main.962d78de.css.map",
-    "main.512df980.js.map": "/Barangay-Case-Portal/static/js/main.512df980.js.map"
+    "main.6ca76fe0.css.map": "/Barangay-Case-Portal/static/css/main.6ca76fe0.css.map",
+    "main.5ac3d9ab.js.map": "/Barangay-Case-Portal/static/js/main.5ac3d9ab.js.map"
   },
   "entrypoints": [
-    "static/css/main.962d78de.css",
-    "static/js/main.512df980.js"
+    "static/css/main.6ca76fe0.css",
+    "static/js/main.5ac3d9ab.js"
   ]
 }
