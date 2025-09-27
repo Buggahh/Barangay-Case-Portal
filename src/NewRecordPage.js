@@ -4,6 +4,9 @@ import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import "./NewRecordPage.css";
 import uploadIcon from './icons/upload.png';
+import printIcon from './icons/print.png';
+import editIcon from './icons/edit.png';
+import submitIcon from './icons/submit.png';
 
 function NewRecordPage({ onLogout }) {
   const [role, setRole] = useState("");
@@ -46,6 +49,25 @@ function NewRecordPage({ onLogout }) {
 
   // Complainants state
   const [complainants, setComplainants] = useState([
+    {
+      lastname: "",
+      firstname: "",
+      middlename: "",
+      extension: "",
+      nickname: "",
+      sex: "",
+      birthdate: "",
+      province: "",
+      city: "",
+      barangay: "",
+      specific: "",
+      contact: "",
+      email: ""
+    }
+  ]);
+
+  // Respondents state
+  const [respondents, setRespondents] = useState([
     {
       lastname: "",
       firstname: "",
@@ -145,8 +167,37 @@ function NewRecordPage({ onLogout }) {
     );
   };
 
+    const handleRespondentChange = (idx, field, value) => {
+    setRespondents(list =>
+      list.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
   const handleAddComplainant = () => {
     setComplainants(list => [
+      ...list,
+      {
+        lastname: "",
+        firstname: "",
+        middlename: "",
+        extension: "",
+        nickname: "",
+        sex: "",
+        birthdate: "",
+        province: "",
+        city: "",
+        barangay: "",
+        specific: "",
+        contact: "",
+        email: ""
+      }
+    ]);
+  };
+
+  const handleAddRespondent = () => {
+    setRespondents(list => [
       ...list,
       {
         lastname: "",
@@ -371,6 +422,7 @@ function NewRecordPage({ onLogout }) {
                   value={statusDate}
                   onChange={e => setStatusDate(e.target.value)}
                   className="case-status-input"
+                  style={{ width: "70%" }}
                 />
               </td>
               {statusOptions.map(option => (
@@ -460,7 +512,7 @@ function NewRecordPage({ onLogout }) {
                   onChange={e => setExecutionReason(e.target.value)}
                   className="case-status-input"
                   placeholder="Enter reason"
-                  style={{ width: "70%" }}
+                  style={{ width: "85%" }}
                 />
               </td>
             </tr>
@@ -496,7 +548,7 @@ function NewRecordPage({ onLogout }) {
                       onChange={e => handleAmmicableChange(idx, "remarks", e.target.value)}
                       className="newrecord-input"
                       placeholder="Enter remarks"
-                      style={{ width: "80%" }}
+                      style={{ width: "90%" }}
                     />
                     {idx === ammicableRows.length - 1 && (
                       <button
@@ -588,7 +640,7 @@ function NewRecordPage({ onLogout }) {
       </div>
 
       {/* Complainant's Information Section */}
-      <div className="complainantInformation-main-content">
+      <div className="newrecord-main-content">
         <h1 style={{ color: 'red' }}>Complainant’s Information</h1>
         {complainants.map((c, idx) => (
           <div
@@ -741,32 +793,224 @@ function NewRecordPage({ onLogout }) {
                     />
                   </td>
                 </tr>
-                <tr>
+                <tr style={{ position: idx === complainants.length - 1 ? "relative" : "static" }}>
                   <td className="complainantInformation-label">EmailAdd:</td>
-                  <td>
+                  <td style={{ position: "relative" }}>
                     <input
                       type="email"
                       className="newrecord-input"
                       value={c.email}
                       onChange={e => handleComplainantChange(idx, "email", e.target.value)}
                     />
+                    {idx === complainants.length - 1 && (
+                      <button
+                        className="newrecord-add-btn add-btn-absolute"
+                        type="button"
+                        onClick={handleAddComplainant}
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+
+      {/* Respondent's Information Section */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Respondent’s Information</h1>
+        {respondents.map((c, idx) => (
+          <div
+            key={idx}
+            className="respondentInformation-row"
+          >
+            {/* Left Table */}
+            <table className="respondentInformation-table left">
+              <tbody>
+                <tr>
+                  <td className="respondentInformation-label">Lastname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.lastname}
+                      onChange={e => handleRespondentChange(idx, "lastname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Firstname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.firstname}
+                      onChange={e => handleRespondentChange(idx, "firstname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Middlename:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.middlename}
+                      onChange={e => handleRespondentChange(idx, "middlename", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Extension:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.extension}
+                      onChange={e => handleRespondentChange(idx, "extension", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Nickname:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.nickname}
+                      onChange={e => handleRespondentChange(idx, "nickname", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Sex:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.sex}
+                      onChange={e => handleRespondentChange(idx, "sex", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Birthdate:</td>
+                  <td>
+                    <input
+                      type="date"
+                      className="newrecord-input"
+                      value={c.birthdate}
+                      onChange={e => handleRespondentChange(idx, "birthdate", e.target.value)}
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            {/* +ADD button */}
-            {idx === complainants.length - 1 && (
-              <button
-                className="newrecord-add-btn"
-                type="button"
-                onClick={handleAddComplainant}
-              >
-                + ADD
-              </button>
-            )}
+            {/* Right Table */}
+            <table className="respondentInformation-table right">
+              <thead>
+                <tr>
+                  <th colSpan={2}>Address and Contact Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="respondentInformation-label">Province:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.province}
+                      onChange={e => handleRespondentChange(idx, "province", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">City/Mun:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.city}
+                      onChange={e => handleRespondentChange(idx, "city", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Barangay:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.barangay}
+                      onChange={e => handleRespondentChange(idx, "barangay", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">Specific:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.specific}
+                      onChange={e => handleRespondentChange(idx, "specific", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="respondentInformation-label">ContactNo:</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="newrecord-input"
+                      value={c.contact}
+                      onChange={e => handleRespondentChange(idx, "contact", e.target.value)}
+                    />
+                  </td>
+                </tr>
+                <tr style={{ position: idx === respondents.length - 1 ? "relative" : "static" }}>
+                  <td className="respondentInformation-label">EmailAdd:</td>
+                  <td style={{ position: "relative" }}>
+                    <input
+                      type="email"
+                      className="newrecord-input"
+                      value={c.email}
+                      onChange={e => handleRespondentChange(idx, "email", e.target.value)}
+                    />
+                    {idx === respondents.length - 1 && (
+                      <button
+                        className="newrecord-add-btn add-btn-absolute"
+                        type="button"
+                        onClick={handleAddRespondent}
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ))}
+      </div>
+      <div className="sticky-button-panel">
+        <button className="sticky-btn">
+          <img src={printIcon} alt="Print" />
+          <span>PRINT</span>
+        </button>
+        <button className="sticky-btn">
+          <img src={editIcon} alt="Edit" />
+          <span>EDIT</span>
+        </button>
+        <button className="sticky-btn submit">
+          <img src={submitIcon} alt="Submit" />
+          <span>SUBMIT</span>
+        </button>
       </div>
     </div>
   );

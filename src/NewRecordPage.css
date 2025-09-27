@@ -40,7 +40,7 @@
 }
 
 .newrecord-add-btn {
-  color: #e42727;
+  color: #ed2426;
   background: none;
   border: none;
   font-weight: bold;
@@ -200,7 +200,7 @@
 }
 
 .complainant-table.left {
-  width: 40%;                  
+  width: 30%;                  
   min-width: 300px;
 }
 
@@ -240,7 +240,6 @@
   margin-right: 4px;
 }
 
-/* Wrapper */
 .complainantInformation-main-content {
   gap: 20px;                  
   max-width: 90%;           
@@ -249,9 +248,10 @@
 
 .complainantInformation-row {
   display: flex;
-  gap: 30px;
-  margin-bottom: 12px;
-  align-items: flex-start;
+  justify-content: flex-start; 
+  gap: 20px;                  
+  max-width: 90%;    
+  margin-bottom: 20px; 
 }
 
 /* Tables */
@@ -260,24 +260,20 @@
   background: #fff;
 }
 
-/* Left Table smaller */
+/* Use the same widths as .complainant-table */
 .complainantInformation-table.left {
-  width: 35%;
+  width: 40%;                  
   min-width: 300px;
-  border: 2px solid #000;
 }
-
-/* Right Table bigger */
 .complainantInformation-table.right {
-  width: 55%;
+  width: 70%;                  
   min-width: 400px;
-  border: 2px solid #000;
 }
 
 /* Remove border for header row */
 .complainantInformation-table.right th {
   background: #fff7f0;
-  padding: 8px;
+  padding: 8px 8px 13px 0px;
   font-size: 16px;
   text-align: left;
 }
@@ -294,4 +290,89 @@
   min-width: 120px;
   font-weight: 600;
   font-size: 14px;
+}
+
+.respondentInformation-main-content {
+  gap: 20px;                  
+  max-width: 90%;           
+  margin-left: 16px;       
+}
+
+.respondentInformation-row {
+  display: flex;
+  justify-content: flex-start; 
+  gap: 20px;                  
+  max-width: 90%;    
+  margin-bottom: 20px; 
+}
+
+/* Tables */
+.respondentInformation-table {
+  border-collapse: collapse;
+  background: #fff;
+}
+
+/* Use the same widths as .complainant-table */
+.respondentInformation-table.left {
+  width: 40%;                  
+  min-width: 300px;
+}
+.respondentInformation-table.right {
+  width: 70%;                  
+  min-width: 400px;
+}
+
+/* Remove border for header row */
+.respondentInformation-table.right th {
+  background: #fff7f0;
+  padding: 8px 8px 13px 0px;
+  font-size: 16px;
+  text-align: left;
+}
+
+/* Cells */
+.respondentInformation-table td {
+  border: 2px solid #000;
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+
+/* Labels */
+.respondentInformation-label {
+  min-width: 120px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* The floating panel itself */
+.sticky-button-panel {
+  position: fixed;         /* fixed to the viewport */
+  top: 400px;              /* adjust based on your header height */
+  right: 27px;             /* distance from the right edge */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;            /* stay on top of tables */
+  width: 120px;            /* small width */
+}
+
+/* Each button */
+.sticky-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 19px;
+  font-weight: 600;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #ed2426;
+}
+
+/* Icon sizes */
+.sticky-btn img {
+  width: 30px;
+  height: 30px;
 }
