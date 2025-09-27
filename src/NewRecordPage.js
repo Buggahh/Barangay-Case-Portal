@@ -7,6 +7,7 @@ import uploadIcon from './icons/upload.png';
 import printIcon from './icons/print.png';
 import editIcon from './icons/edit.png';
 import submitIcon from './icons/submit.png';
+import { submitNewCase } from "./SubmitCase";
 
 function NewRecordPage({ onLogout }) {
   const [role, setRole] = useState("");
@@ -84,6 +85,25 @@ function NewRecordPage({ onLogout }) {
       email: ""
     }
   ]);
+
+  // Add state for Complainant section inputs (before return)
+  const initialComplainantSection = {
+    dateTimeFiled: "",
+    dateOfIncident: "",
+    placeOfIncident: "",
+    natureOfComplaint: "",
+    offenseViolation: "",
+    specific: ""
+  };
+  const [complainantSection, setComplainantSection] = useState(initialComplainantSection);
+
+  // Handler for Complainant section inputs
+  const handleComplainantSectionChange = (field, value) => {
+    setComplainantSection(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   // Fetch user role from Firestore
   useEffect(() => {
@@ -215,6 +235,35 @@ function NewRecordPage({ onLogout }) {
         email: ""
       }
     ]);
+  };
+
+  // Submit handler for the sticky submit button
+  const handleSubmitCase = async () => {
+    try {
+      // Pass both complainantSection and complainants to Firestore
+      await submitNewCase(complainantSection, complainants);
+      alert("Case submitted successfully!");
+      setComplainantSection(initialComplainantSection); // Clear all Complainant section fields
+      setComplainants([
+        {
+          lastname: "",
+          firstname: "",
+          middlename: "",
+          extension: "",
+          nickname: "",
+          sex: "",
+          birthdate: "",
+          province: "",
+          city: "",
+          barangay: "",
+          specific: "",
+          contact: "",
+          email: ""
+        }
+      ]); // Clear all complainant info fields
+    } catch (err) {
+      alert("Error submitting case: " + err.message);
+    }
   };
 
   return (
@@ -600,20 +649,62 @@ function NewRecordPage({ onLogout }) {
               <tr>
                 <td className="complainant-label">Date &amp; Time Filed</td>
                 <td>
-                  <input type="date" className="newrecord-input small-input" />
-                  <input type="time" className="newrecord-input small-input" />
+                  <input
+                    type="date"
+                    className="newrecord-input small-input"
+                    value={complainantSection.dateTimeFiled.split("T")[0] || ""}
+                    onChange={e =>
+                      handleComplainantSectionChange(
+                        "dateTimeFiled",
+                        e.target.value +
+                          (complainantSection.dateTimeFiled.split("T")[1]
+                            ? "T" + complainantSection.dateTimeFiled.split("T")[1]
+                            : "")
+                      )
+                    }
+                  />
+                  <input
+                    type="time"
+                    className="newrecord-input small-input"
+                    value={
+                      complainantSection.dateTimeFiled.split("T")[1] || ""
+                    }
+                    onChange={e =>
+                      handleComplainantSectionChange(
+                        "dateTimeFiled",
+                        (complainantSection.dateTimeFiled.split("T")[0] || "") +
+                          "T" +
+                          e.target.value
+                      )
+                    }
+                  />
                 </td>
               </tr>
               <tr>
                 <td className="complainant-label">Date of Incident</td>
                 <td>
-                  <input type="date" className="newrecord-input small-input" />
+                  <input
+                    type="date"
+                    className="newrecord-input small-input"
+                    value={complainantSection.dateOfIncident}
+                    onChange={e =>
+                      handleComplainantSectionChange("dateOfIncident", e.target.value)
+                    }
+                  />
                 </td>
               </tr>
               <tr>
                 <td className="complainant-label">Place of Incident</td>
                 <td>
-                  <input type="text" className="newrecord-input" placeholder="Enter place" />
+                  <input
+                    type="text"
+                    className="newrecord-input"
+                    placeholder="Enter place"
+                    value={complainantSection.placeOfIncident}
+                    onChange={e =>
+                      handleComplainantSectionChange("placeOfIncident", e.target.value)
+                    }
+                  />
                 </td>
               </tr>
             </tbody>
@@ -623,16 +714,48 @@ function NewRecordPage({ onLogout }) {
           <table className="complainant-table right">
             <tbody>
               <tr>
-                <td className="complainant-label" style={{ width: "20%" }}>Nature of Complaint</td>
-                <td><input type="text" className="newrecord-input" placeholder="Enter nature" /></td>
+                <td className="complainant-label" style={{ width: "20%" }}>
+                  Nature of Complaint
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    className="newrecord-input"
+                    placeholder="Enter nature"
+                    value={complainantSection.natureOfComplaint}
+                    onChange={e =>
+                      handleComplainantSectionChange("natureOfComplaint", e.target.value)
+                    }
+                  />
+                </td>
               </tr>
               <tr>
                 <td className="complainant-label">Offense/Violation</td>
-                <td><input type="text" className="newrecord-input" placeholder="Enter offense" /></td>
+                <td>
+                  <input
+                    type="text"
+                    className="newrecord-input"
+                    placeholder="Enter offense"
+                    value={complainantSection.offenseViolation}
+                    onChange={e =>
+                      handleComplainantSectionChange("offenseViolation", e.target.value)
+                    }
+                  />
+                </td>
               </tr>
               <tr>
                 <td className="complainant-label">Specific</td>
-                <td><input type="text" className="newrecord-input" placeholder="Enter specific" /></td>
+                <td>
+                  <input
+                    type="text"
+                    className="newrecord-input"
+                    placeholder="Enter specific"
+                    value={complainantSection.specific}
+                    onChange={e =>
+                      handleComplainantSectionChange("specific", e.target.value)
+                    }
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -1007,7 +1130,7 @@ function NewRecordPage({ onLogout }) {
           <img src={editIcon} alt="Edit" />
           <span>EDIT</span>
         </button>
-        <button className="sticky-btn submit">
+        <button className="sticky-btn submit" onClick={handleSubmitCase}>
           <img src={submitIcon} alt="Submit" />
           <span>SUBMIT</span>
         </button>
