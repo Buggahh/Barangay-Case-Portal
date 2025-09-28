@@ -1,7 +1,7 @@
 {
   "name": "barangay-case-portal",
   "version": "0.1.0",
-  "homepage": "https://buggahh.github.io/Barangay-Case-Portal",
+  "homepage": "https://buggahh.github.io/KP-MIS",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",

@@ -8,6 +8,7 @@ import printIcon from './icons/print.png';
 import editIcon from './icons/edit.png';
 import submitIcon from './icons/submit.png';
 import { submitNewCase } from "./SubmitCase";
+import { canWriteToFirestore } from "./RoleCheck";
 
 function NewRecordPage({ onLogout }) {
   const [role, setRole] = useState("");
@@ -237,13 +238,43 @@ function NewRecordPage({ onLogout }) {
     ]);
   };
 
+  const initialAmmicableRows = [
+    { date: "", time: "", remarks: "" }
+  ];
+
   // Submit handler for the sticky submit button
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleSubmitCase = async () => {
+    if (!canWriteToFirestore(role)) {
+      alert("You dont have access to this");
+      return;
+    }
+    setLoading(true);
     try {
-      // Pass both complainantSection and complainants to Firestore
-      await submitNewCase(complainantSection, complainants);
-      alert("Case submitted successfully!");
-      setComplainantSection(initialComplainantSection); // Clear all Complainant section fields
+      const caseStatus = {
+        statusDate,
+        selectedStatus,
+        repudiated,
+        mainPoint,
+        execution,
+        executionDate,
+        executionReason
+      };
+      await submitNewCase(
+        complainantSection,
+        complainants,
+        respondents,
+        caseStatus,
+        ammicableRows,
+        {
+          arbitrationRows,
+          conciliationRows,
+          mediationRows
+        }
+      );
+      setComplainantSection(initialComplainantSection);
       setComplainants([
         {
           lastname: "",
@@ -260,14 +291,94 @@ function NewRecordPage({ onLogout }) {
           contact: "",
           email: ""
         }
-      ]); // Clear all complainant info fields
+      ]);
+      setRespondents([
+        {
+          lastname: "",
+          firstname: "",
+          middlename: "",
+          extension: "",
+          nickname: "",
+          sex: "",
+          birthdate: "",
+          province: "",
+          city: "",
+          barangay: "",
+          specific: "",
+          contact: "",
+          email: ""
+        }
+      ]);
+      setAmmicableRows(initialAmmicableRows);
+      setStatusDate("");
+      setSelectedStatus("");
+      setRepudiated("");
+      setMainPoint("");
+      setExecution("");
+      setExecutionDate("");
+      setExecutionReason("");
+      setArbitrationRows([{ date: "", time: "", remarks: "" }]);
+      setConciliationRows([{ date: "", time: "", remarks: "" }]);
+      setMediationRows([{ date: "", time: "", remarks: "" }]);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 1000);
     } catch (err) {
       alert("Error submitting case: " + err.message);
     }
+    setLoading(false);
   };
 
   return (
     <div>
+      {loading && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.4)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "10px",
+            padding: "30px 40px",
+            boxShadow: "0 2px 16px rgba(0,0,0,0.25)",
+            fontSize: "1.2rem",
+            fontWeight: 500,
+            textAlign: "center"
+          }}>
+            Submitting case, please wait...
+          </div>
+        </div>
+      )}
+      {showSuccess && (
+        <div style={{
+          position: "fixed",
+          top: "150px",
+          right: "30px",
+          background: "#27ae60",
+          color: "#fff",
+          borderRadius: "8px",
+          padding: "14px 28px",
+          fontWeight: 600,
+          fontSize: "1.1rem",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          zIndex: 9998,
+          display: "flex",
+          alignItems: "center"
+        }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{marginRight: "10px"}}>
+          <circle cx="12" cy="12" r="12" fill="#fff" opacity="0.2"/>
+          <path d="M7 13.5l3 3 7-7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Case Submitted
+        </div>
+      )}
       {/* Header */}
       <header className="header-container">
         {/* Top Row */}

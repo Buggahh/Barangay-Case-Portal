@@ -44,7 +44,7 @@ function App() {
       if (!querySnapshot.empty) {
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("loggedInUsername", username);
-        navigate("/Portal"); // Navigate to /Portal after login
+        navigate("/portal"); // Navigate to /Portal after login
       } else {
         setError('Invalid credentials');
       }
@@ -60,7 +60,6 @@ function App() {
     setUsername('');
     setPassword('');
     setError('');
-    navigate("/", { replace: true }); // Use replace to prevent back navigation
   };
 
   return (
@@ -72,7 +71,7 @@ function App() {
             <div className="login-container">
               <div className="login-title-group">
                 <h2 className="login-title">Sign In</h2>
-                <div className="login-subtitle">Login with your account.....</div>
+                <div className="login-subtitle">Login with your account</div>
               </div>
               <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                 <div className="input-wrapper">
@@ -118,11 +117,11 @@ function App() {
               <div className="error">{error}</div>
             </div>
           </div>
-          < FirestoreTest/>
+          {/* < FirestoreTest/> */}
         </div>
       } />
       <Route
-        path="/Portal"
+        path="/portal"
         element={
           <ProtectedRoute>
             <PortalPage onLogout={handleLogout} />
