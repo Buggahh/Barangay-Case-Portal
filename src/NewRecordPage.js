@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { db } from "./firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import "./NewRecordPage.css";
 import uploadIcon from './icons/upload.png';
 import printIcon from './icons/print.png';
@@ -49,6 +49,18 @@ function NewRecordPage({ onLogout }) {
     { date: "", time: "", remarks: "" }
   ]);
 
+  const [caseStatusRows, setCaseStatusRows] = useState([
+  {
+    statusDate: "",
+    selectedStatus: "",
+    repudiated: "",
+    mainPoint: "",
+    execution: "",
+    executionDate: "",
+    executionReason: ""
+  }
+]);
+
   // Complainants state
   const [complainants, setComplainants] = useState([
     {
@@ -89,6 +101,7 @@ function NewRecordPage({ onLogout }) {
 
   // Add state for Complainant section inputs (before return)
   const initialComplainantSection = {
+    caseIdNumber: "", // <-- add this
     dateTimeFiled: "",
     dateOfIncident: "",
     placeOfIncident: "",
@@ -125,7 +138,7 @@ function NewRecordPage({ onLogout }) {
     fetchRole();
   }, [username]);
 
-  // Handlers for each table
+  // Handlers for each table - Adds the rows
   const handleMediationChange = (idx, field, value) => {
     setMediationRows(rows =>
       rows.map((row, i) =>
@@ -155,6 +168,15 @@ function NewRecordPage({ onLogout }) {
     );
   };
 
+  const handleCaseStatusChange = (idx, field, value) => {
+    setCaseStatusRows(rows =>
+      rows.map((row, i) =>
+        i === idx ? { ...row, [field]: value } : row
+      )
+    );
+  };
+
+  // Updates the state of rows by making it blank
   const handleAddMediation = () => {
     setMediationRows(rows => [
       ...rows,
@@ -238,6 +260,21 @@ function NewRecordPage({ onLogout }) {
     ]);
   };
 
+  const handleAddCaseStatus = () => {
+    setCaseStatusRows(rows => [
+      ...rows,
+      {
+        statusDate: "",
+        selectedStatus: "",
+        repudiated: "",
+        mainPoint: "",
+        execution: "",
+        executionDate: "",
+        executionReason: ""
+      }
+    ]);
+  };
+
   const initialAmmicableRows = [
     { date: "", time: "", remarks: "" }
   ];
@@ -245,6 +282,8 @@ function NewRecordPage({ onLogout }) {
   // Submit handler for the sticky submit button
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmitCase = async () => {
     if (!canWriteToFirestore(role)) {
@@ -252,27 +291,37 @@ function NewRecordPage({ onLogout }) {
       return;
     }
     setLoading(true);
+
+    // Check for duplicate Case ID
+    const caseIdToCheck = complainantSection.caseIdNumber;
+    if (!caseIdToCheck) {
+      setLoading(false);
+      setErrorMessage("Case ID Number is required.");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 2000);
+      return;
+    }
+    if (await isDuplicateCaseId(caseIdToCheck)) {
+      setLoading(false);
+      setErrorMessage("Check Case ID! Cannot be the same.");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 2000);
+      return;
+    }
+
     try {
-      const caseStatus = {
-        statusDate,
-        selectedStatus,
-        repudiated,
-        mainPoint,
-        execution,
-        executionDate,
-        executionReason
-      };
       await submitNewCase(
         complainantSection,
         complainants,
         respondents,
-        caseStatus,
+        caseStatusRows,
         ammicableRows,
         {
           arbitrationRows,
           conciliationRows,
           mediationRows
-        }
+        },
+        complainantSection.caseIdNumber
       );
       setComplainantSection(initialComplainantSection);
       setComplainants([
@@ -310,23 +359,37 @@ function NewRecordPage({ onLogout }) {
         }
       ]);
       setAmmicableRows(initialAmmicableRows);
-      setStatusDate("");
-      setSelectedStatus("");
-      setRepudiated("");
-      setMainPoint("");
-      setExecution("");
-      setExecutionDate("");
-      setExecutionReason("");
+      setCaseStatusRows([
+        {
+          statusDate: "",
+          selectedStatus: "",
+          repudiated: "",
+          mainPoint: "",
+          execution: "",
+          executionDate: "",
+          executionReason: ""
+        }
+      ]);
       setArbitrationRows([{ date: "", time: "", remarks: "" }]);
       setConciliationRows([{ date: "", time: "", remarks: "" }]);
       setMediationRows([{ date: "", time: "", remarks: "" }]);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 1000);
     } catch (err) {
-      alert("Error submitting case: " + err.message);
+      setErrorMessage("Error submitting case: " + err.message);
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
     }
     setLoading(false);
   };
+
+  // Check for duplicate Case ID
+  async function isDuplicateCaseId(caseId) {
+    if (!caseId) return false;
+    const caseDocRef = doc(db, "cases", caseId);
+    const caseDocSnap = await getDoc(caseDocRef);
+    return caseDocSnap.exists();
+  }
 
   return (
     <div>
@@ -379,6 +442,29 @@ function NewRecordPage({ onLogout }) {
         Case Submitted
         </div>
       )}
+      {showError && (
+        <div style={{
+          position: "fixed",
+          top: "150px",
+          right: "30px",
+          background: "#e74c3c",
+          color: "#fff",
+          borderRadius: "8px",
+          padding: "14px 28px",
+          fontWeight: 600,
+          fontSize: "1.1rem",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          zIndex: 9998,
+          display: "flex",
+          alignItems: "center"
+        }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{marginRight: "10px"}}>
+          <circle cx="12" cy="12" r="12" fill="#fff" opacity="0.2"/>
+          <path d="M12 8v4m0 4h.01M21 12.79V22H3V2h9.21M21 3l-9 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {errorMessage}
+        </div>
+      )}
       {/* Header */}
       <header className="header-container">
         {/* Top Row */}
@@ -414,340 +500,28 @@ function NewRecordPage({ onLogout }) {
         </div>
       </header>
 
-      {/* Case Management - Mediation Proceedings */}
-      <div className="newrecord-main-content">
-        <h1 style={{ color: 'red' }}>Case Management</h1>
+      {/* Case Id Number */}
+      <div className="newrecord-main-content" style={{ marginTop: "60px" }}>
         <div className="newrecord-table-row">
-          <table className="newrecord-table">
+          <table className="newrecord-table" style={{width: "27.2%"}}>
             <tbody>
               <tr>
-              </tr>
-              {mediationRows.map((row, idx) => (
-                <tr key={idx} style={{ position: idx === mediationRows.length - 1 ? "relative" : "static" }}>
-                  <td>{idx === 0 ? "Mediation Proceedings" : ""}</td>
-                  <td>
-                    <input
-                      type="date"
-                      value={row.date}
-                      onChange={e => handleMediationChange(idx, "date", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="time"
-                      value={row.time}
-                      onChange={e => handleMediationChange(idx, "time", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td style={{ paddingLeft: "0px" }}>
-                    <input
-                      type="text"
-                      value={row.remarks}
-                      onChange={e => handleMediationChange(idx, "remarks", e.target.value)}
-                      className="newrecord-input"
-                      placeholder="Enter remarks"
-                    />
-                    {idx === mediationRows.length - 1 && (
-                      <button
-                        className="newrecord-add-btn add-btn-absolute"
-                        onClick={handleAddMediation}
-                        type="button"
-                      >
-                        + ADD
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Case Management - Conciliation Proceedings */}
-      <div className="newrecord-main-content" style={{ borderCollapse: 'collapse', paddingTop: 0 }}>
-        <div className="newrecord-table-row">
-          <table className="newrecord-table">
-            <tbody>
-              <tr>
-              </tr>
-              {conciliationRows.map((row, idx) => (
-                <tr key={idx} style={{ position: idx === conciliationRows.length - 1 ? "relative" : "static" }}>
-                  <td>{idx === 0 ? "Conciliation Proceedings" : ""}</td>
-                  <td>
-                    <input
-                      type="date"
-                      value={row.date}
-                      onChange={e => handleConciliationChange(idx, "date", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="time"
-                      value={row.time}
-                      onChange={e => handleConciliationChange(idx, "time", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td style={{ paddingLeft: "0px" }}>
-                    <input
-                      type="text"
-                      value={row.remarks}
-                      onChange={e => handleConciliationChange(idx, "remarks", e.target.value)}
-                      className="newrecord-input"
-                      placeholder="Enter remarks"
-                    />
-                    {idx === conciliationRows.length - 1 && (
-                      <button
-                        className="newrecord-add-btn add-btn-absolute"
-                        onClick={handleAddConciliation}
-                        type="button"
-                      >
-                        + ADD
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Case Management - Arbitration Proceedings */}
-      <div className="newrecord-main-content" style={{ borderCollapse: 'collapse', paddingTop: 0 }}>
-        <div className="newrecord-table-row">
-          <table className="newrecord-table">
-            <tbody>
-              <tr>
-              </tr>
-              {arbitrationRows.map((row, idx) => (
-                <tr key={idx} style={{ position: idx === arbitrationRows.length - 1 ? "relative" : "static" }}>
-                  <td>{idx === 0 ? "Arbitration Proceedings" : ""}</td>
-                  <td>
-                    <input
-                      type="date"
-                      value={row.date}
-                      onChange={e => handleArbitrationChange(idx, "date", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="time"
-                      value={row.time}
-                      onChange={e => handleArbitrationChange(idx, "time", e.target.value)}
-                      className="newrecord-input"
-                    />
-                  </td>
-                  <td style={{ paddingLeft: "0px" }}>
-                    <input
-                      type="text"
-                      value={row.remarks}
-                      onChange={e => handleArbitrationChange(idx, "remarks", e.target.value)}
-                      className="newrecord-input"
-                      placeholder="Enter remarks"
-                    />
-                    {idx === arbitrationRows.length - 1 && (
-                      <button
-                        className="newrecord-add-btn add-btn-absolute"
-                        onClick={handleAddArbitration}
-                        type="button"
-                      >
-                        + ADD
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {/* Case Status - Section */}
-      <div className="newrecord-main-content">
-        <h1 style={{ color: 'red' }}>Case Status</h1>
-        {/* Case Status - Status */}
-        <table className="case-status-table">
-          <tbody>
-            <tr>
-              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
-                Date:&nbsp;
-                <input
-                  type="date"
-                  value={statusDate}
-                  onChange={e => setStatusDate(e.target.value)}
-                  className="case-status-input"
-                  style={{ width: "70%" }}
-                />
-              </td>
-              {statusOptions.map(option => (
-                <td
-                  key={option}
-                  className={`case-status-cell status-btn${selectedStatus === option ? " selected" : ""}`}
-                  onClick={() => setSelectedStatus(option)}
-                  style={{textAlign: "center", cursor: "pointer" }}
-                >
-                  {option}
+                <td className="complainantInformation-label">Case ID Number:</td>
+                <td style={{ width: "65%" }}>
+                  <input
+                    type="text"
+                    className="newrecord-input"
+                    placeholder="Enter Case ID"
+                    value={complainantSection.caseIdNumber}
+                    onChange={e =>
+                      handleComplainantSectionChange("caseIdNumber", e.target.value)
+                    }
+                  />
                 </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Case Status - Repudiated Table */}
-        <table className="case-status-table">
-          <tbody>
-            <tr>
-              <td className="case-status-cell" style={{fontWeight: 600, background: "#f8f8f8" }}>
-                {selectedStatus && <span>{selectedStatus}</span>}
-              </td>
-              <td className="case-status-cell" style={{fontWeight: 600, borderBottomColor: '#ffffff'}}>
-                Main Point of Agreement/Award:
-              </td>
-            </tr>
-            <tr>
-              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
-                Repudiated?&nbsp;
-                <span
-                  className={`pill-radio${repudiated === "Yes" ? " selected" : ""}`}
-                  onClick={() => setRepudiated("Yes")}
-                >Yes</span>
-                <span style={{ margin: "0 8px" }}>or</span>
-                <span
-                  className={`pill-radio${repudiated === "No" ? " selected" : ""}`}
-                  onClick={() => setRepudiated("No")}
-                >No</span>
-              </td>
-              <td
-                className="case-status-cell"
-                style={{ verticalAlign: "top" , paddingTop: "0px"}}>
-                <input
-                  type="text"
-                  value={mainPoint}
-                  onChange={e => setMainPoint(e.target.value)}
-                  className="case-status-input"
-                  placeholder="Enter main point of agreement/award"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Case Status - Execution Table */}
-        <table className="case-status-table">
-          <tbody>
-            <tr>
-              <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>Execution</td>
-              <td className="case-status-cell" style={{fontWeight: 600,  width: 240, textAlign: "center" }}>
-                <span
-                  className={`pill-radio${execution === "Yes" ? " selected" : ""}`}
-                  onClick={() => setExecution("Yes")}
-                >Yes</span>
-                <span style={{ margin: "0 8px" }}>or</span>
-                <span
-                  className={`pill-radio${execution === "No" ? " selected" : ""}`}
-                  onClick={() => setExecution("No")}
-                >No</span>
-              </td>
-              <td className="case-status-cell" style={{ width: 205 }}>
-                Date:&nbsp;
-                <input
-                  type="date"
-                  value={executionDate}
-                  onChange={e => setExecutionDate(e.target.value)}
-                  className="case-status-input"
-                  style={{ width: "70%" }}
-                />
-              </td>
-              <td className="case-status-cell">
-                Reason:&nbsp;
-                <input
-                  type="text"
-                  value={executionReason}
-                  onChange={e => setExecutionReason(e.target.value)}
-                  className="case-status-input"
-                  placeholder="Enter reason"
-                  style={{ width: "85%" }}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Compliance to Amicable Settlement */}
-      <div className="newrecord-main-content">
-        <h1 style={{ color: 'red' }}>Compliance to Amicable Settlement</h1>
-        <div className="newrecord-table-row">
-          <table className="newrecord-table">
-            <tbody>
-              <tr>
-              </tr>
-              {ammicableRows.map((row, idx) => (
-                <tr key={idx} style={{ position: idx === ammicableRows.length - 1 ? "relative" : "static" }}>
-                  <td style={{ width: 0 }}>
-                    <span style={{marginRight: 12}}>Date:</span>
-                    <input
-                      type="date"
-                      value={row.date}
-                      onChange={e => handleAmmicableChange(idx, "date", e.target.value)}
-                      className="newrecord-input"
-                      style={{ width: "70%" }}
-                    />
-                  </td>
-                  <td style={{ paddingLeft: "0px" }}>
-                    <span style={{marginLeft: 12, marginRight: 12 }}>Remarks:</span>
-                    <input
-                      type="text"
-                      value={row.remarks}
-                      onChange={e => handleAmmicableChange(idx, "remarks", e.target.value)}
-                      className="newrecord-input"
-                      placeholder="Enter remarks"
-                      style={{ width: "90%" }}
-                    />
-                    {idx === ammicableRows.length - 1 && (
-                      <button
-                        className="newrecord-add-btn"
-                        onClick={handleAddAmmicable}
-                        type="button"
-                      >
-                        + ADD
-                      </button>
-                    )}
-                  </td>
                 </tr>
-              ))}
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Uploads */}
-      <div className="newrecord-main-content">
-        <h1 style={{ color: 'red' }}>Uploads</h1>
-        <ul className="uploads-list">
-          <li>
-            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
-            <span className="upload-label">Complaint Sheet</span>
-          </li>
-          <li>
-            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
-            <span className="upload-label">Amicable Settlement</span>
-          </li>
-          <li>
-            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
-            <span className="upload-label">Certificate to File Action</span>
-          </li>
-          <li>
-            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
-            <span className="upload-label">Photo</span>
-          </li>
-        </ul>
       </div>
 
       {/* Complainant Section */}
@@ -829,15 +603,19 @@ function NewRecordPage({ onLogout }) {
                   Nature of Complaint
                 </td>
                 <td>
-                  <input
-                    type="text"
+                  <select
                     className="newrecord-input"
-                    placeholder="Enter nature"
                     value={complainantSection.natureOfComplaint}
+                    
                     onChange={e =>
                       handleComplainantSectionChange("natureOfComplaint", e.target.value)
                     }
-                  />
+                  >
+                    <option value="">Select</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Criminal">Criminal</option>
+                    <option value="Others">Others</option>
+                  </select>
                 </td>
               </tr>
               <tr>
@@ -940,14 +718,23 @@ function NewRecordPage({ onLogout }) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="complainantInformation-label">Sex:</td>
+                  <td className="complainantInformation-label">Sex/Gender:</td>
                   <td>
-                    <input
-                      type="text"
+                    <select
+                      style={{ width: "95%" }}
                       className="newrecord-input"
                       value={c.sex}
                       onChange={e => handleComplainantChange(idx, "sex", e.target.value)}
-                    />
+                    >
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Bisexual">Bisexual</option>
+                      <option value="Lesbian">Lesbian</option>
+                      <option value="Gay">Gay</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </td>
                 </tr>
                 <tr>
@@ -1120,14 +907,23 @@ function NewRecordPage({ onLogout }) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="respondentInformation-label">Sex:</td>
+                  <td className="respondentInformation-label">Sex/Gender:</td>
                   <td>
-                    <input
-                      type="text"
+                    <select
+                      style={{ width: "95%" }}
                       className="newrecord-input"
                       value={c.sex}
                       onChange={e => handleRespondentChange(idx, "sex", e.target.value)}
-                    />
+                    >
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Bisexual">Bisexual</option>
+                      <option value="Lesbian">Lesbian</option>
+                      <option value="Gay">Gay</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </td>
                 </tr>
                 <tr>
@@ -1232,15 +1028,366 @@ function NewRecordPage({ onLogout }) {
           </div>
         ))}
       </div>
+
+      {/* Case Management - Mediation Proceedings */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Case Management</h1>
+        <div className="newrecord-table-row">
+          <table className="newrecord-table">
+            <tbody>
+              {mediationRows.map((row, idx) => (
+                <tr key={idx} style={{ position: idx === mediationRows.length - 1 ? "relative" : "static" }}>
+                  <td>
+                    {`Mediation Proceedings ${idx + 1}`}
+                  </td>
+                  <td>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={e => handleMediationChange(idx, "date", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="time"
+                      value={row.time}
+                      onChange={e => handleMediationChange(idx, "time", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td style={{ paddingLeft: "0px" }}>
+                    <input
+                      type="text"
+                      value={row.remarks}
+                      onChange={e => handleMediationChange(idx, "remarks", e.target.value)}
+                      className="newrecord-input"
+                      placeholder="Enter remarks"
+                    />
+                    {idx === mediationRows.length - 1 && (
+                      <button
+                        className="newrecord-add-btn add-btn-absolute"
+                        onClick={handleAddMediation}
+                        type="button"
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Case Management - Conciliation Proceedings */}
+      <div className="newrecord-main-content" style={{ borderCollapse: 'collapse', paddingTop: 0 }}>
+        <div className="newrecord-table-row">
+          <table className="newrecord-table">
+            <tbody>
+              {conciliationRows.map((row, idx) => (
+                <tr key={idx} style={{ position: idx === conciliationRows.length - 1 ? "relative" : "static" }}>
+                  <td>
+                    {`Conciliation Proceedings ${idx + 1}`}
+                  </td>
+                  <td>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={e => handleConciliationChange(idx, "date", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="time"
+                      value={row.time}
+                      onChange={e => handleConciliationChange(idx, "time", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td style={{ paddingLeft: "0px" }}>
+                    <input
+                      type="text"
+                      value={row.remarks}
+                      onChange={e => handleConciliationChange(idx, "remarks", e.target.value)}
+                      className="newrecord-input"
+                      placeholder="Enter remarks"
+                    />
+                    {idx === conciliationRows.length - 1 && (
+                      <button
+                        className="newrecord-add-btn add-btn-absolute"
+                        onClick={handleAddConciliation}
+                        type="button"
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Case Management - Arbitration Proceedings */}
+      <div className="newrecord-main-content" style={{ borderCollapse: 'collapse', paddingTop: 0 }}>
+        <div className="newrecord-table-row">
+          <table className="newrecord-table">
+            <tbody>
+              {arbitrationRows.map((row, idx) => (
+                <tr key={idx} style={{ position: idx === arbitrationRows.length - 1 ? "relative" : "static" }}>
+                  <td>
+                    {`Arbitration Proceedings ${idx + 1}`}
+                  </td>
+                  <td>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={e => handleArbitrationChange(idx, "date", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="time"
+                      value={row.time}
+                      onChange={e => handleArbitrationChange(idx, "time", e.target.value)}
+                      className="newrecord-input"
+                    />
+                  </td>
+                  <td style={{ paddingLeft: "0px" }}>
+                    <input
+                      type="text"
+                      value={row.remarks}
+                      onChange={e => handleArbitrationChange(idx, "remarks", e.target.value)}
+                      className="newrecord-input"
+                      placeholder="Enter remarks"
+                    />
+                    {idx === arbitrationRows.length - 1 && (
+                      <button
+                        className="newrecord-add-btn add-btn-absolute"
+                        onClick={handleAddArbitration}
+                        type="button"
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Case Status - Section */}
+      <div className="newrecord-main-content" >
+        <h1 style={{ color: 'red' }}>Case Status</h1>
+        {caseStatusRows.map((row, idx) => (
+          <div key={idx} style={{ position: idx === caseStatusRows.length - 1 ? "relative" : "static" , marginBottom: "40px"}}>
+            {/* Case Status - Status */}
+            <div className="newrecord-table-row">
+              <table className="case-status-table">
+                <tbody>
+                  <tr>
+                    <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
+                      Date:&nbsp;
+                      <input
+                        type="date"
+                        value={row.statusDate}
+                        onChange={e => handleCaseStatusChange(idx, "statusDate", e.target.value)}
+                        className="case-status-input"
+                        style={{ width: "70%" }}
+                      />
+                    </td>
+                    {statusOptions.map(option => (
+                      <td
+                        key={option}
+                        className={`case-status-cell status-btn${row.selectedStatus === option ? " selected" : ""}`}
+                        onClick={() => handleCaseStatusChange(idx, "selectedStatus", option)}
+                        style={{textAlign: "center", cursor: "pointer" }}
+                      >
+                        {option}
+                      
+                      </td>
+                    ))}
+                    {idx === caseStatusRows.length - 1 && (
+                      <td>
+                          <button
+                            className="newrecord-add-btn"
+                            style={{ marginRight: "10%" }}
+                            onClick={handleAddCaseStatus}
+                            type="button"
+                          >
+                            + ADD
+                          </button>
+                        </td>
+                    )}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* Repudiated and Execution tables, only if Settled Amicably */}
+            {row.selectedStatus === "Settled Amicably" && (
+              <>
+                {/* Repudiated Table */}
+                <table className="case-status-table">
+                  <tbody>
+                    <tr>
+                      <td className="case-status-cell" style={{fontWeight: 600, background: "#f8f8f8" }}>
+                        {row.selectedStatus && <span>{row.selectedStatus}</span>}
+                      </td>
+                      <td className="case-status-cell" style={{fontWeight: 600, borderBottomColor: '#ffffff'}}>
+                        Main Point of Agreement/Award:
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>
+                        Repudiated?&nbsp;
+                        <span
+                          className={`pill-radio${row.repudiated === "Yes" ? " selected" : ""}`}
+                          onClick={() => handleCaseStatusChange(idx, "repudiated", "Yes")}
+                        >Yes</span>
+                        <span style={{ margin: "0 8px" }}>or</span>
+                        <span
+                          className={`pill-radio${row.repudiated === "No" ? " selected" : ""}`}
+                          onClick={() => handleCaseStatusChange(idx, "repudiated", "No")}
+                        >No</span>
+                      </td>
+                      <td
+                        className="case-status-cell"
+                        style={{ verticalAlign: "top" , paddingTop: "0px"}}>
+                        <input
+                          type="text"
+                          value={row.mainPoint}
+                          onChange={e => handleCaseStatusChange(idx, "mainPoint", e.target.value)}
+                          className="case-status-input"
+                          placeholder="Enter main point of agreement/award"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                {/* Execution Table */}
+                <table className="case-status-table">
+                  <tbody>
+                    <tr>
+                      <td className="case-status-cell" style={{fontWeight: 600,  width: 220}}>Execution</td>
+                      <td className="case-status-cell" style={{fontWeight: 600,  width: 240, textAlign: "center" }}>
+                        <span
+                          className={`pill-radio${row.execution === "Yes" ? " selected" : ""}`}
+                          onClick={() => handleCaseStatusChange(idx, "execution", "Yes")}
+                        >Yes</span>
+                        <span style={{ margin: "0 8px" }}>or</span>
+                        <span
+                          className={`pill-radio${row.execution === "No" ? " selected" : ""}`}
+                          onClick={() => handleCaseStatusChange(idx, "execution", "No")}
+                        >No</span>
+                      </td>
+                      <td className="case-status-cell" style={{ width: 205 }}>
+                        Date:&nbsp;
+                        <input
+                          type="date"
+                          value={row.executionDate}
+                          onChange={e => handleCaseStatusChange(idx, "executionDate", e.target.value)}
+                          className="case-status-input"
+                          style={{ width: "70%" }}
+                        />
+                      </td>
+                      <td className="case-status-cell">
+                        Reason:&nbsp;
+                        <input
+                          type="text"
+                          value={row.executionReason}
+                          onChange={e => handleCaseStatusChange(idx, "executionReason", e.target.value)}
+                          className="case-status-input"
+                          placeholder="Enter reason"
+                          style={{ width: "85%" }}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Compliance to Amicable Settlement */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Compliance to Amicable Settlement</h1>
+        <div className="newrecord-table-row">
+          <table className="newrecord-table">
+            <tbody>
+              <tr>
+              </tr>
+              {ammicableRows.map((row, idx) => (
+                <tr key={idx} style={{ position: idx === ammicableRows.length - 1 ? "relative" : "static" }}>
+                  <td style={{ width: 0 }}>
+                    <span style={{marginRight: 12}}>Date:</span>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={e => handleAmmicableChange(idx, "date", e.target.value)}
+                      className="newrecord-input"
+                      style={{ width: "70%" }}
+                    />
+                  </td>
+                  <td style={{ paddingLeft: "0px" }}>
+                    <span style={{marginLeft: 12, marginRight: 12 }}>Remarks:</span>
+                    <input
+                      type="text"
+                      value={row.remarks}
+                      onChange={e => handleAmmicableChange(idx, "remarks", e.target.value)}
+                      className="newrecord-input"
+                      placeholder="Enter remarks"
+                      style={{ width: "90%" }}
+                    />
+                    {idx === ammicableRows.length - 1 && (
+                      <button
+                        className="newrecord-add-btn"
+                        onClick={handleAddAmmicable}
+                        type="button"
+                      >
+                        + ADD
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Uploads */}
+      <div className="newrecord-main-content">
+        <h1 style={{ color: 'red' }}>Uploads</h1>
+        <ul className="uploads-list">
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Complaint Sheet</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Amicable Settlement</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Certificate to File Action</span>
+          </li>
+          <li>
+            <img src={uploadIcon} alt="Upload File" className="upload-icon" style={{ cursor: "pointer" }} tabIndex={0} />
+            <span className="upload-label">Photo</span>
+          </li>
+        </ul>
+      </div>
+
       <div className="sticky-button-panel">
-        <button className="sticky-btn">
-          <img src={printIcon} alt="Print" />
-          <span>PRINT</span>
-        </button>
-        <button className="sticky-btn">
-          <img src={editIcon} alt="Edit" />
-          <span>EDIT</span>
-        </button>
         <button className="sticky-btn submit" onClick={handleSubmitCase}>
           <img src={submitIcon} alt="Submit" />
           <span>SUBMIT</span>
@@ -1249,5 +1396,4 @@ function NewRecordPage({ onLogout }) {
     </div>
   );
 }
-
 export default NewRecordPage;

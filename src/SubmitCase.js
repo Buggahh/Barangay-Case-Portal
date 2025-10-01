@@ -4,50 +4,32 @@ import { collection, getDocs, setDoc, doc } from "firebase/firestore";
 /**
  * Submits a new case to Firestore "cases" collection with a numeric document name,
  * and adds all complainants, respondents, case status, compliance, and case management entries as subcollections.
- * @param {Object} complainantInputs - The inputs from the Complainant section.
+ * @param {Object} complainantSection - The inputs from the Complainant section.
  * @param {Array<Object>} complainants - Array of complainant info objects.
  * @param {Array<Object>} respondents - Array of respondent info objects.
- * @param {Array<Object>|Object} caseStatus - Array of case status objects, or a single object.
- * @param {Array<Object>} compliance - Array of compliance objects.
- * @param {Object} caseManagement - Object containing arbitrationRows, conciliationRows, mediationRows.
+ * @param {Array<Object>} caseStatusRows - Array of case status objects.
+ * @param {Array<Object>} ammicableRows - Array of compliance objects.
+ * @param {Object} proceedings - Object containing arbitrationRows, conciliationRows, mediationRows.
+ * @param {string} caseIdNumber - The case document ID to be used (optional).
  * @returns {Promise<string>} - The new case document ID (number as string).
  */
 export async function submitNewCase(
-  complainantInputs,
+  complainantSection,
   complainants,
   respondents,
-  caseStatus,
-  compliance,
-  caseManagement
+  caseStatusRows,
+  ammicableRows,
+  proceedings,
+  caseIdNumber // <-- add this
 ) {
-  const casesRef = collection(db, "cases");
-  const snapshot = await getDocs(casesRef);
+  // Use the provided caseIdNumber as the document ID
+  const caseDocId = caseIdNumber && caseIdNumber.trim() !== "" ? caseIdNumber : `caseId${Date.now()}`;
+  const caseDocRef = doc(collection(db, "cases"), caseDocId);
 
-  // Find the highest numeric case name
-  let maxCaseNum = 0;
-  snapshot.forEach(docSnap => {
-    const match = docSnap.id.match(/^caseId(\d+)$/);
-    const caseNum = match ? parseInt(match[1], 10) : 0;
-    if (caseNum > maxCaseNum) {
-      maxCaseNum = caseNum;
-    }
-  });
-  const nextCaseNum = maxCaseNum + 1;
-  const caseDocId = `caseId${nextCaseNum}`;
-
-  // Prepare the case data (main document)
-  const caseData = {
-    dateTimeFiled: complainantInputs.dateTimeFiled || "",
-    dateOfIncident: complainantInputs.dateOfIncident || "",
-    natureOfComplaint: complainantInputs.natureOfComplaint || "",
-    offenseViolation: complainantInputs.offenseViolation || "",
-    placeOfIncident: complainantInputs.placeOfIncident || "",
-    specific: complainantInputs.specific || "",
+  await setDoc(caseDocRef, {
+    ...complainantSection,
     createdAt: new Date().toISOString()
-  };
-
-  // Add the new case with the next caseId<num> as the document name
-  await setDoc(doc(casesRef, caseDocId), caseData);
+  });
 
   // Add complainants under cases/<caseDocId>/complainant/complainantIdN
   const complainantColRef = collection(db, "cases", caseDocId, "complainant");
@@ -93,7 +75,7 @@ export async function submitNewCase(
 
   // Add case status under cases/<caseDocId>/caseStatus/caseStatusIdN
   const caseStatusColRef = collection(db, "cases", caseDocId, "caseStatus");
-  const statusArray = Array.isArray(caseStatus) ? caseStatus : [caseStatus];
+  const statusArray = Array.isArray(caseStatusRows) ? caseStatusRows : [caseStatusRows];
   for (let i = 0; i < statusArray.length; i++) {
     const s = statusArray[i];
     const caseStatusDoc = {
@@ -110,8 +92,8 @@ export async function submitNewCase(
 
   // Add compliance under cases/<caseDocId>/compliance/complianceIdN
   const complianceColRef = collection(db, "cases", caseDocId, "compliance");
-  for (let i = 0; i < (compliance?.length || 0); i++) {
-    const comp = compliance[i];
+  for (let i = 0; i < (ammicableRows?.length || 0); i++) {
+    const comp = ammicableRows[i];
     const complianceDoc = {
       date: comp?.date || "",
       remarks: comp?.remarks || ""
@@ -123,31 +105,31 @@ export async function submitNewCase(
   const caseManagementColRef = collection(db, "cases", caseDocId, "caseManagement");
 
   // Arbitration
-  if (caseManagement?.arbitrationRows) {
+  if (proceedings?.arbitrationRows) {
     const arbitrationDocRef = doc(caseManagementColRef, "arbitration");
     const arbitrationFields = {};
-    for (let i = 0; i < caseManagement.arbitrationRows.length; i++) {
-      arbitrationFields[`arbitrationId${i + 1}`] = caseManagement.arbitrationRows[i];
+    for (let i = 0; i < proceedings.arbitrationRows.length; i++) {
+      arbitrationFields[`arbitrationId${i + 1}`] = proceedings.arbitrationRows[i];
     }
     await setDoc(arbitrationDocRef, arbitrationFields);
   }
 
   // Conciliation
-  if (caseManagement?.conciliationRows) {
+  if (proceedings?.conciliationRows) {
     const conciliationDocRef = doc(caseManagementColRef, "conciliation");
     const conciliationFields = {};
-    for (let i = 0; i < caseManagement.conciliationRows.length; i++) {
-      conciliationFields[`conciliationId${i + 1}`] = caseManagement.conciliationRows[i];
+    for (let i = 0; i < proceedings.conciliationRows.length; i++) {
+      conciliationFields[`conciliationId${i + 1}`] = proceedings.conciliationRows[i];
     }
     await setDoc(conciliationDocRef, conciliationFields);
   }
 
   // Mediation
-  if (caseManagement?.mediationRows) {
+  if (proceedings?.mediationRows) {
     const mediationDocRef = doc(caseManagementColRef, "mediation");
     const mediationFields = {};
-    for (let i = 0; i < caseManagement.mediationRows.length; i++) {
-      mediationFields[`mediationId${i + 1}`] = caseManagement.mediationRows[i];
+    for (let i = 0; i < proceedings.mediationRows.length; i++) {
+      mediationFields[`mediationId${i + 1}`] = proceedings.mediationRows[i];
     }
     await setDoc(mediationDocRef, mediationFields);
   }
